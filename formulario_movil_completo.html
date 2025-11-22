@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Evaluación Kelvin - Móvil</title>
+    
+    <link rel="stylesheet" href="formulario_movil.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <div class="brand-header">
+            <img src="https://via.placeholder.com/100" alt="Logo" class="brand-logo">
+            <h1 class="brand-name">Prototipo del Kelvin</h1>
+        </div>
+
+        <div class="progress-header">
+            <div class="progress-labels">
+                <span id="stepLabel">Datos Personales</span>
+                <span id="stepCounter">1/4</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+        </div>
+
+        <form id="clientForm">
+            
+            <div class="card active" id="step1">
+                <h3>👤 Datos Personales</h3>
+                <div class="card-scroll-area">
+                    <div class="form-group"><label>Nombre Completo *</label><input type="text" id="nombre_completo" required></div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Edad</label><input type="number" id="edad"></div>
+                        <div class="form-group">
+                            <label>Sexo</label>
+                            <select id="sexo"><option value="Masculino">Masculino</option><option value="Femenino">Femenino</option><option value="Otro">Otro</option></select>
+                        </div>
+                    </div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono"></div>
+                    <div class="form-group"><label>Correo Electrónico</label><input type="email" id="email"></div>
+                    <div class="form-group"><label>Fecha de Evaluación *</label><input type="date" id="fecha_evaluacion" required></div>
+                </div>
+                <div class="nav-buttons single"><button type="button" class="btn-next" onclick="nextStep(1)">Siguiente</button></div>
+            </div>
+
+            <div class="card" id="step2">
+                <h3>⚖️ Composición Corporal</h3>
+                <div class="card-scroll-area">
+                    <div class="grid-2">
+                        <div class="form-group"><label>Peso (kg) *</label><input type="number" step="0.1" id="peso_kg" required></div>
+                        <div class="form-group"><label>Estatura (cm) *</label><input type="number" step="0.1" id="estatura_cm" required></div>
+                    </div>
+                    <div class="form-group"><label>IMC (Automático)</label><input type="number" id="imc" readonly style="background:#e0e7ff; color:#4338ca; font-weight:bold;"></div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>% Grasa</label><input type="number" step="0.1" id="grasa_corporal_pct"></div>
+                        <div class="form-group"><label>Masa Muscular</label><input type="number" step="0.1" id="masa_muscular"></div>
+                    </div>
+                </div>
+                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(2)">Atrás</button><button type="button" class="btn-next" onclick="nextStep(2)">Siguiente</button></div>
+            </div>
+
+            <div class="card" id="step3">
+                <h3>📏 Medidas (cm)</h3>
+                <div class="card-scroll-area">
+                    <div class="grid-2">
+                        <div class="form-group"><label>Brazos</label><input type="number" step="0.1" id="med_brazos"></div>
+                        <div class="form-group"><label>Pecho</label><input type="number" step="0.1" id="med_pecho"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group"><label>Cintura</label><input type="number" step="0.1" id="med_cintura"></div>
+                        <div class="form-group"><label>Caderas</label><input type="number" step="0.1" id="med_caderas"></div>
+                    </div>
+                    <div class="form-group"><label>Piernas</label><input type="number" step="0.1" id="med_piernas"></div>
+                </div>
+                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(3)">Atrás</button><button type="button" class="btn-next" onclick="nextStep(3)">Siguiente</button></div>
+            </div>
+
+            <div class="card" id="step4">
+                <h3>❤️ Historial Salud</h3>
+                <div class="card-scroll-area">
+                    <div class="form-group"><label>Enfermedades o Lesiones</label><textarea id="enfermedades_lesiones" rows="2"></textarea></div>
+                    <div class="form-group"><label>Alergias</label><textarea id="alergias" rows="2"></textarea></div>
+                    <div class="form-group"><label>Cirugías Recientes</label><textarea id="cirugias_recientes" rows="2"></textarea></div>
+                    <div class="form-group"><label>Medicamentos Actuales</label><textarea id="medicamentos_actuales" rows="2"></textarea></div>
+                    <div class="form-group"><label>Estrés y Sueño</label><textarea id="estres_sueno" rows="2"></textarea></div>
+                </div>
+                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(4)">Atrás</button><button type="submit" class="btn-submit">Guardar Cliente</button></div>
+            </div>
+
+        </form>
+    </div>
+
+    <div style="display:none;">
+        <div id="registro"></div><div id="informes"></div>
+        <button class="tab-button" onclick="showTab('registro')"></button>
+        <input id="searchName"><button id="searchButton"></button>
+        <div id="reportResult"></div><button id="downloadPdfButton"></button>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="formulario_movil.js"></script>
+</body>
+</html>
