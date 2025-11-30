@@ -1,37 +1,136 @@
-// *** Este archivo es EXCLUSIVO para el formulario móvil. ***
+// *** Este archivo es 100% INDEPENDIENTE y maneja la lógica completa del formulario móvil. ***
 
+// *** 🎯 URL DE TU GOOGLE APPS SCRIPT ***
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB0ILClDlyofK7TKouASLs0ppGuzbKU-FFMKm7o7xfv9qpyhiwlrl1dabfzwfbszt9hhq/exec"; 
+// **********************************************************************
+
+// =======================================================
+// VARIABLES Y DOM
+// =======================================================
+let currentStep = 1; 
+const totalSteps = 3; // 3 pasos (Personal, Composición, Salud)
+const labels = ["Datos Personales", "Composición Corporal", "Historial Salud"]; 
+
+const clientForm = document.getElementById('clientForm');
+const pesoInput = document.getElementById('peso_kg');
+const estaturaInput = document.getElementById('estatura_cm');
+const imcInput = document.getElementById('imc');
+
+
+// =======================================================
+// FUNCIONES DE NAVEGACIÓN Y CÁLCULO
+// =======================================================
+
+/**
+ * Función genérica para mostrar/ocultar pestañas.
+ */
+window.showTab = (tabId) => {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+
+    const activeTab = document.getElementById(tabId);
+    if (activeTab) {
+        activeTab.classList.add('active');
+        const activeButton = document.querySelector(`.tab-button[onclick="showTab('${tabId}')"]`);
+        if(activeButton) {
+             activeButton.classList.add('active');
+        }
+    }
+};
+
+/**
+ * Actualiza la interfaz de navegación (barra y etiquetas de pasos).
+ */
+const updateUI = () => {
+    // 1. Ocultar todas las tarjetas y mostrar la actual
+    document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
+    const activeCard = document.getElementById(`step${currentStep}`);
+    if (activeCard) {
+        activeCard.classList.add('active');
+         const scrollArea = activeCard.querySelector('.card-scroll-area');
+         if(scrollArea) scrollArea.scrollTop = 0;
+    }
+    
+    // 2. Actualizar barra de progreso y etiquetas
+    const progressPct = (currentStep / totalSteps) * 100;
+    document.getElementById('progressBar').style.width = `${progressPct}%`;
+    document.getElementById('stepCounter').innerText = `${currentStep}/${totalSteps}`;
+    document.getElementById('stepLabel').innerText = labels[currentStep - 1];
+};
+
+/**
+ * Avanza al siguiente paso (maneja validación de campos required).
+ */
+window.nextStep = (step) => {
+    const currentCard = document.getElementById('step' + step);
+    const requiredInputs = currentCard.querySelectorAll('input[required], select[required]');
+    let valid = true;
+
+    // Validación de campos requeridos
+    requiredInputs.forEach(input => {
+        if (!input.value) {
+            valid = false;
+            // Feedback visual
+            input.style.borderColor = '#ef4444'; 
+            input.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}], {duration:300});
+        } else {
+            input.style.borderColor = '#e5e7eb';
+        }
+    });
+    
+    if (valid && currentStep < totalSteps) {
+        currentStep++;
+        updateUI();
+    }
+};
+
+/**
+ * Regresa al paso anterior.
+ */
+window.prevStep = (step) => {
+    if (currentStep > 1) {
+        currentStep--;
+        updateUI();
+    }
+};
+
+/**
+ * Calcula el IMC automáticamente.
+ */
+const calculateIMC = () => {
+    if (!pesoInput || !estaturaInput || !imcInput) return;
+
+    const peso = parseFloat(pesoInput.value);
+    const estatura = parseFloat(estaturaInput.value);
+    
+    if (peso > 0 && estatura > 0) {
+        const estaturaMetros = estatura / 100;
+        const imc = peso / (estaturaMetros * estaturaMetros); 
+        imcInput.value = imc.toFixed(2);
+    } else {
+        imcInput.value = '';
+    }
+};
+
+// =======================================================
+// LÓGICA DE INICIALIZACIÓN Y ENVÍO (POST)
+// =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // *** 🎯 URL DE TU GOOGLE APPS SCRIPT (Misma URL) ***
-    const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZ_lsNOECVi2RxbANScWR6kgAmTneNbkPXL9RWER_SK5tP-QEyUXUT3BlgT4XLJBFWyQ/exec"; 
-    // *************************************************
+    // Inicializar la interfaz de pasos
+    updateUI(); 
 
-    const clientForm = document.getElementById('clientForm');
-    const pesoInput = document.getElementById('peso_kg');
-    const estaturaInput = document.getElementById('estatura_cm');
-    const imcInput = document.getElementById('imc');
-
-    // --- CÁLCULO AUTOMÁTICO DE IMC ---
-    const calculateIMC = () => {
-        const peso = parseFloat(pesoInput.value);
-        const estatura = parseFloat(estaturaInput.value);
-        if (peso > 0 && estatura > 0) {
-            const estaturaMetros = estatura / 100;
-            const imc = peso / (estaturaMetros * estaturaMetros);
-            imcInput.value = imc.toFixed(2);
-        } else {
-            imcInput.value = '';
-        }
-    };
-    
-    // Solo agregar listeners si los elementos existen (para evitar errores si este script se usara en otro lado)
+    // Event Listeners para el IMC
     if(pesoInput && estaturaInput) {
         pesoInput.addEventListener('input', calculateIMC);
         estaturaInput.addEventListener('input', calculateIMC);
     }
 
-
-    // --- ENVÍO DEL FORMULARIO (POST) ---
+    // LÓGICA DE ENVÍO DE DATOS (POST)
     if(clientForm) {
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -43,24 +142,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.innerText = "Guardando...";
             }
 
-            // Recolectar datos
+            // Recolección de datos
             const formData = {
                 nombre_completo: document.getElementById('nombre_completo').value.trim(),
                 edad: parseInt(document.getElementById('edad').value) || null,
                 sexo: document.getElementById('sexo').value,
-                telefono: document.getElementById('telefono').value,
+                telefono: document.getElementById('telefono').value, // OBLIGATORIO
                 email: document.getElementById('email').value,
                 fecha_evaluacion: document.getElementById('fecha_evaluacion').value,
-                peso_kg: parseFloat(document.getElementById('peso_kg').value) || null,
-                estatura_cm: parseFloat(document.getElementById('estatura_cm').value) || null,
+                peso_kg: parseFloat(document.getElementById('peso_kg').value) || null, // OBLIGATORIO
+                estatura_cm: parseFloat(document.getElementById('estatura_cm').value) || null, // OBLIGATORIO
                 imc: parseFloat(document.getElementById('imc').value) || null,
                 grasa_corporal_pct: parseFloat(document.getElementById('grasa_corporal_pct').value) || null,
                 masa_muscular: parseFloat(document.getElementById('masa_muscular').value) || null,
-                med_brazos: parseFloat(document.getElementById('med_brazos').value) || null,
-                med_pecho: parseFloat(document.getElementById('med_pecho').value) || null,
-                med_cintura: parseFloat(document.getElementById('med_cintura').value) || null,
-                med_caderas: parseFloat(document.getElementById('med_caderas').value) || null,
-                med_piernas: parseFloat(document.getElementById('med_piernas').value) || null,
+                
+                // Medidas como null
+                med_brazos: null, 
+                med_pecho: null,
+                med_cintura: null,
+                med_caderas: null,
+                med_piernas: null,
+
                 enfermedades_lesiones: document.getElementById('enfermedades_lesiones').value,
                 alergias: document.getElementById('alergias').value,
                 cirugias_recientes: document.getElementById('cirugias_recientes').value,
@@ -68,14 +170,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 estres_sueno: document.getElementById('estres_sueno').value,
                 timestamp: new Date().toISOString() 
             };
-
-            if (!formData.nombre_completo || !formData.fecha_evaluacion) {
-                alert('Por favor, completa el Nombre Completo y la Fecha de Evaluación.');
+            
+            // VALIDACIÓN MANUAL AL FINAL DEL FORMULARIO (para asegurar)
+            if (!formData.nombre_completo || !formData.fecha_evaluacion || !formData.telefono || !formData.peso_kg || !formData.estatura_cm) {
+                alert('Faltan campos obligatorios: Nombre, Fecha, Teléfono, Peso y Estatura.');
+                
+                // Regresar al paso correspondiente para que el usuario corrija
+                if (!formData.nombre_completo || !formData.fecha_evaluacion || !formData.telefono) {
+                    currentStep = 1;
+                } else if (!formData.peso_kg || !formData.estatura_cm) {
+                    currentStep = 2;
+                }
+                updateUI(); // Forzar la vista del paso con error
+                
                 if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = originalBtnText; }
                 return;
             }
 
-            // Envío de la solicitud HTTP POST
+            // Envío a Google Apps Script
             try {
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
@@ -88,21 +200,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok && result.result === 'success') {
-                    alert('¡Cliente registrado con éxito!');
+                    alert('¡Cliente registrado con éxito en Google Sheets!');
                     clientForm.reset(); 
                     calculateIMC(); 
-                    // Regresar al primer paso del formulario móvil
-                    if(typeof updateUI === 'function') {
-                        currentStep = 1;
-                        updateUI();
-                    }
+                    
+                    // Reiniciar al paso 1 después del éxito
+                    currentStep = 1;
+                    updateUI();
                 } else {
-                    alert('Error al guardar los datos: ' + (result.message || 'Error desconocido'));
+                    alert('Error al guardar: ' + (result.message || 'Error desconocido'));
                 }
 
             } catch (error) {
                 console.error('Error de conexión:', error);
-                alert('Error de red o conexión al intentar guardar los datos.');
+                alert('Error de red. Verifica tu conexión y la URL del script.');
             } finally {
                 if(submitBtn) {
                     submitBtn.disabled = false;
@@ -111,4 +222,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-}); 
+});
