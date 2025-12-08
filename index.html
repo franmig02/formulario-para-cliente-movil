@@ -8,20 +8,21 @@
     <link rel="stylesheet" href="formulario_movil.css">
     
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
     <div class="main-container">
         
         <div class="brand-header">
-            <img src="https://via.placeholder.com/100" alt="Logo" class="brand-logo">
+            <img src="logo kelvin .png" alt="Logo" class="brand-logo">
             <h1 class="brand-name">Prototipo del Kelvin</h1>
         </div>
 
         <div class="progress-header">
             <div class="progress-labels">
                 <span id="stepLabel">Datos Personales</span>
-                <span id="stepCounter">1/3</span>
+                <span id="stepCounter">1/4</span>
             </div>
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progressBar"></div>
@@ -33,7 +34,7 @@
             <div class="card active" id="step1">
                 <h3>👤 Datos Personales</h3>
                 <div class="card-scroll-area">
-                    <div class="form-group"><label>Nombre Completo *</label><input type="text" id="nombre_completo" required></div>
+                    <div class="form-group"><label>Nombre Completo *</label><input type="text" id="nombre_completo" placeholder="!NOMBRE COMPLETO!" required></div>
                     <div class="grid-2">
                         <div class="form-group"><label>Edad</label><input type="number" id="edad" required ></div>
                         <div class="form-group">
@@ -67,15 +68,25 @@
             <div class="card" id="step3">
                 <h3>❤️ Historial Salud</h3>
                 <div class="card-scroll-area">
-                    <div class="form-group"><label>Enfermedades o Lesiones</label><textarea id="enfermedades_lesiones" rows="2"></textarea></div>
+                    <div class="form-group"><label>Enfermedades y Lesiones</label><textarea id="enfermedades_lesiones" rows="2" placeholder="Si no tiene ninguna escriba nada " required ></textarea></div>
                     <div class="form-group"><label>Alergias</label><textarea id="alergias" rows="2"></textarea></div>
                     <div class="form-group"><label>Cirugías Recientes</label><textarea id="cirugias_recientes" rows="2"></textarea></div>
                     <div class="form-group"><label>Medicamentos Actuales</label><textarea id="medicamentos_actuales" rows="2"></textarea></div>
-                    <div class="form-group"><label>Estrés y Sueño</label><textarea id="estres_sueno" rows="2"></textarea></div>
+                    <div class="form-group"><label>Horas de Sueño</label><textarea id="estres_sueno" rows="2"></textarea></div>
                 </div>
-                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(3)">Atrás</button><button type="submit" class="btn-submit">Guardar Cliente</button></div>
+                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(3)">Atrás</button><button type="button" class="btn-next" onclick="nextStep(3)">Siguiente</button></div>
             </div>
 
+            <div class="card" id="step4">
+                <h3>⭐ Metas y Objetivos</h3>
+                <div class="card-scroll-area">
+                    <div class="form-group"><label>¿Cuáles son tus metas principales?</label>
+                        <textarea id="metas_objetivos" rows="5" placeholder="Ej: Perder 10kg, aumentar masa muscular, mejorar resistencia, etc."></textarea>
+                    </div>
+                </div>
+                <div class="nav-buttons"><button type="button" class="btn-prev" onclick="prevStep(4)">Atrás</button><button type="submit" class="btn-submit">Guardar Cliente</button></div>
+            </div>
+            
         </form>
     </div>
 

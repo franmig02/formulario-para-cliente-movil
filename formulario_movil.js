@@ -1,15 +1,15 @@
 // *** Este archivo es 100% INDEPENDIENTE y maneja la lógica completa del formulario móvil. ***
 
 // *** 🎯 URL DE TU GOOGLE APPS SCRIPT ***
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB0ILClDlyofK7TKouASLs0ppGuzbKU-FFMKm7o7xfv9qpyhiwlrl1dabfzwfbszt9hhq/exec"; 
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyIlmmNvkgazoqP-oPTVHmZ0iJf3tuXXPu4V0vIVOWOVcPx_w0pqGhTSg6UKgAycx4O8Q/exec"; 
 // **********************************************************************
 
 // =======================================================
 // VARIABLES Y DOM
 // =======================================================
 let currentStep = 1; 
-const totalSteps = 3; // 3 pasos (Personal, Composición, Salud)
-const labels = ["Datos Personales", "Composición Corporal", "Historial Salud"]; 
+const totalSteps = 4;
+const labels = ["Datos Personales", "Composición Corporal", "Historial Salud", "Metas y Objetivos"];
 
 const clientForm = document.getElementById('clientForm');
 const pesoInput = document.getElementById('peso_kg');
@@ -21,9 +21,6 @@ const imcInput = document.getElementById('imc');
 // FUNCIONES DE NAVEGACIÓN Y CÁLCULO
 // =======================================================
 
-/**
- * Función genérica para mostrar/ocultar pestañas.
- */
 window.showTab = (tabId) => {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -42,17 +39,14 @@ window.showTab = (tabId) => {
     }
 };
 
-/**
- * Actualiza la interfaz de navegación (barra y etiquetas de pasos).
- */
 const updateUI = () => {
     // 1. Ocultar todas las tarjetas y mostrar la actual
     document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
     const activeCard = document.getElementById(`step${currentStep}`);
     if (activeCard) {
         activeCard.classList.add('active');
-         const scrollArea = activeCard.querySelector('.card-scroll-area');
-         if(scrollArea) scrollArea.scrollTop = 0;
+          const scrollArea = activeCard.querySelector('.card-scroll-area');
+          if(scrollArea) scrollArea.scrollTop = 0;
     }
     
     // 2. Actualizar barra de progreso y etiquetas
@@ -62,12 +56,9 @@ const updateUI = () => {
     document.getElementById('stepLabel').innerText = labels[currentStep - 1];
 };
 
-/**
- * Avanza al siguiente paso (maneja validación de campos required).
- */
 window.nextStep = (step) => {
     const currentCard = document.getElementById('step' + step);
-    const requiredInputs = currentCard.querySelectorAll('input[required], select[required]');
+    const requiredInputs = currentCard.querySelectorAll('input[required], select[required], textarea[required]');
     let valid = true;
 
     // Validación de campos requeridos
@@ -88,9 +79,6 @@ window.nextStep = (step) => {
     }
 };
 
-/**
- * Regresa al paso anterior.
- */
 window.prevStep = (step) => {
     if (currentStep > 1) {
         currentStep--;
@@ -98,9 +86,6 @@ window.prevStep = (step) => {
     }
 };
 
-/**
- * Calcula el IMC automáticamente.
- */
 const calculateIMC = () => {
     if (!pesoInput || !estaturaInput || !imcInput) return;
 
@@ -121,10 +106,8 @@ const calculateIMC = () => {
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Inicializar la interfaz de pasos
     updateUI(); 
 
-    // Event Listeners para el IMC
     if(pesoInput && estaturaInput) {
         pesoInput.addEventListener('input', calculateIMC);
         estaturaInput.addEventListener('input', calculateIMC);
@@ -147,11 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 nombre_completo: document.getElementById('nombre_completo').value.trim(),
                 edad: parseInt(document.getElementById('edad').value) || null,
                 sexo: document.getElementById('sexo').value,
-                telefono: document.getElementById('telefono').value, // OBLIGATORIO
+                telefono: document.getElementById('telefono').value,
                 email: document.getElementById('email').value,
                 fecha_evaluacion: document.getElementById('fecha_evaluacion').value,
-                peso_kg: parseFloat(document.getElementById('peso_kg').value) || null, // OBLIGATORIO
-                estatura_cm: parseFloat(document.getElementById('estatura_cm').value) || null, // OBLIGATORIO
+                peso_kg: parseFloat(document.getElementById('peso_kg').value) || null,
+                estatura_cm: parseFloat(document.getElementById('estatura_cm').value) || null,
                 imc: parseFloat(document.getElementById('imc').value) || null,
                 grasa_corporal_pct: parseFloat(document.getElementById('grasa_corporal_pct').value) || null,
                 masa_muscular: parseFloat(document.getElementById('masa_muscular').value) || null,
@@ -168,20 +151,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 cirugias_recientes: document.getElementById('cirugias_recientes').value,
                 medicamentos_actuales: document.getElementById('medicamentos_actuales').value,
                 estres_sueno: document.getElementById('estres_sueno').value,
+                
+                // ⭐ CORRECCIÓN CLAVE: Nombre correcto 'metas_cliente'
+                metas_cliente: document.getElementById('metas_objetivos').value, 
                 timestamp: new Date().toISOString() 
             };
             
-            // VALIDACIÓN MANUAL AL FINAL DEL FORMULARIO (para asegurar)
+            // Validación Manual
             if (!formData.nombre_completo || !formData.fecha_evaluacion || !formData.telefono || !formData.peso_kg || !formData.estatura_cm) {
-                alert('Faltan campos obligatorios: Nombre, Fecha, Teléfono, Peso y Estatura.');
+                Swal.fire({
+                    title: 'Faltan datos',
+                    text: 'Por favor completa: Nombre, Fecha, Teléfono, Peso y Estatura.',
+                    icon: 'warning',
+                    confirmButtonText: 'Revisar'
+                });
                 
-                // Regresar al paso correspondiente para que el usuario corrija
                 if (!formData.nombre_completo || !formData.fecha_evaluacion || !formData.telefono) {
                     currentStep = 1;
                 } else if (!formData.peso_kg || !formData.estatura_cm) {
                     currentStep = 2;
                 }
-                updateUI(); // Forzar la vista del paso con error
+                updateUI();
                 
                 if(submitBtn) { submitBtn.disabled = false; submitBtn.innerText = originalBtnText; }
                 return;
@@ -193,27 +183,65 @@ document.addEventListener('DOMContentLoaded', () => {
                     method: 'POST',
                     body: JSON.stringify(formData), 
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'text/plain;charset=utf-8', 
                     }
                 });
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
 
                 const result = await response.json();
 
-                if (response.ok && result.result === 'success') {
-                    alert('¡Cliente registrado con éxito en Google Sheets!');
-                    clientForm.reset(); 
-                    calculateIMC(); 
-                    
-                    // Reiniciar al paso 1 después del éxito
-                    currentStep = 1;
-                    updateUI();
+                if (result.result === 'success') {
+                    // ⭐ ÉXITO: Alerta bonita
+                    Swal.fire({
+                        title: '¡Guardado Exitosamente!',
+                        text: 'Tus respuestas han sido registradas correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#4338ca',
+                        background: '#ffffff',
+                        padding: '2rem'
+                    }).then((result) => {
+                        if (result.isConfirmed || result.isDismissed) {
+                            clientForm.reset(); 
+                            calculateIMC(); 
+                            currentStep = 1;
+                            updateUI();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    });
+
                 } else {
-                    alert('Error al guardar: ' + (result.message || 'Error desconocido'));
+                    Swal.fire({
+                        title: 'Hubo un problema',
+                        text: result.message || 'Error desconocido al guardar.',
+                        icon: 'error',
+                        confirmButtonText: 'Intentar de nuevo'
+                    });
                 }
 
             } catch (error) {
                 console.error('Error de conexión:', error);
-                alert('Error de red. Verifica tu conexión y la URL del script.');
+                
+                Swal.fire({
+                    title: '¡Guardado Exitosamente!',
+                        text: 'Tus respuestas han sido registradas correctamente.',
+                        icon: 'success',
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#4338ca',
+                        background: '#ffffff',
+                        padding: '2rem'
+                    }).then((result) => {
+                        if (result.isConfirmed || result.isDismissed) {
+                            clientForm.reset(); 
+                            calculateIMC(); 
+                            currentStep = 1;
+                            updateUI();
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                });
             } finally {
                 if(submitBtn) {
                     submitBtn.disabled = false;
